@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe BlogCLI do
+describe BostonEvents do
   it 'has a version number' do
-    expect(BlogCLI::VERSION).not_to be nil
+    expect(BostonEvents::VERSION).not_to be nil
   end
 
   it 'does something useful' do

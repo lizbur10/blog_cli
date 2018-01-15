@@ -1,4 +1,4 @@
-class BlogCLI::CLI
+class BostonEvents::CLI
   attr_reader :last_input, :current_user
 
   def call

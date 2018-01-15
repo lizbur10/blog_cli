@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-require "blog_cli"
+require "boston_events"
 
 ActiveRecord::Base.logger = Logger.new(STDOUT)
 
@@ -13,6 +13,6 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 # Pry.start
 
 require "irb"
-module BlogCLI
+module BostonEvents
   IRB.start
 end
