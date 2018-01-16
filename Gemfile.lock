@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    blog_cli (0.1.0)
+    boston_events (0.1.0)
       activerecord
+      nokogiri
       sinatra-activerecord
       sqlite3
 
@@ -27,7 +28,10 @@ GEM
     i18n (0.9.1)
       concurrent-ruby (~> 1.0)
     method_source (0.9.0)
+    mini_portile2 (2.3.0)
     minitest (5.11.1)
+    nokogiri (1.8.1)
+      mini_portile2 (~> 2.3.0)
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -65,7 +69,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  blog_cli!
+  boston_events!
   bundler (~> 1.11)
   pry
   rake (~> 10.0)

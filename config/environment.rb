@@ -1,5 +1,7 @@
 require 'active_record'
 require 'pry'
+require 'nokogiri'
+require 'open-uri'
 
 
 

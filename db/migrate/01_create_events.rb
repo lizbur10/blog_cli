@@ -1,6 +1,6 @@
-class CreateEvents < ActiveRecord::Migration
+class CreateEvents < ActiveRecord::Migration[4.2]
   def change
-    create_table :posts do |t|
+    create_table :events do |t|
       t.string :name
       t.datetime :dates
       t.string :deal_url
