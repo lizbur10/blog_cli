@@ -3,12 +3,12 @@ class BostonEvents::CLI
 
   def call
     puts; puts
-    puts "Hi! Welcome to the Boston Events Finder -- your BEF friend in the Boston area!"
+    puts "Hi! Welcome to the Boston Events Finder!"
     puts "You can quit this app at any time by typing exit."
     puts; puts "Categories loading..."
     @last_input = nil
     scraper = BostonEvents::Scraper.new
-    while @user_input != "exit"
+    while @last_input != "exit"
       select_category(scraper)
     end #while
   end
@@ -23,7 +23,6 @@ class BostonEvents::CLI
     user_input
     if @last_input.to_i > 0 && @last_input.to_i <= BostonEvents::Category.all.length
       category = BostonEvents::Category.all.detect.with_index(1) { | category, index | @last_input.to_i == index }
-      binding.pry
     elsif @last_input == "exit"
       BostonEvents::Event.destroy_all
       BostonEvents::Category.destroy_all
@@ -34,16 +33,13 @@ class BostonEvents::CLI
       puts "I'm not sure what you want - please enter a category number or type exit"
       select_category(scraper)
     end # if/elsif/else
-    binding.pry
     BostonEvents::Event.list_events(scraper, category)
-    binding.pry
     list_events_in_category(scraper, category)
 end # #select_category
 
   def list_events_in_category(scraper, category)
     puts; puts "Here's what's happening in the #{category.name.capitalize} category:"
     puts
-    binding.pry
     category.events.each.with_index(1) do | event, index |
       puts "#{index}. #{event.name}, #{event.dates}, presented by #{event.sponsor.name}"
     end #each

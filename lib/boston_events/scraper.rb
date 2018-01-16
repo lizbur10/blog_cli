@@ -39,7 +39,6 @@ class BostonEvents::Scraper
             new_category.name = link.text.strip
             new_category.save
             puts new_category
-            # binding.pry
         end
       end
       top_ten = BostonEvents::Category.new
