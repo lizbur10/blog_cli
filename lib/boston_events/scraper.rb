@@ -38,7 +38,7 @@ class BostonEvents::Scraper
             new_category.url = url
             new_category.name = link.text.strip
             new_category.save
-            puts new_category
+            # puts new_category
         end
       end
       top_ten = BostonEvents::Category.new
@@ -77,6 +77,8 @@ class BostonEvents::Scraper
     
             event.category = category
             event.save
+            ## Using this binding shows that category.events always returns an empty array but venue.events or sponsor.events returns an array of events
+            # binding.pry
         end
     end
   
