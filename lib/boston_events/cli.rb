@@ -15,14 +15,14 @@ class BostonEvents::CLI
 
   def select_category(scraper)
     # scraper.categories == nil ? scraper.scrape_categories : scraper.categories
-    BostonEvents::Category.all.size == 0 ? scraper.scrape_categories : nil
+    scraper.scrape_categories
     puts; puts "Start by selecting a category:"
     BostonEvents::Category.all.each.with_index(1) do | category, index |
       puts "#{index}. #{category.name}"
     end
     user_input
     if @last_input.to_i > 0 && @last_input.to_i <= BostonEvents::Category.all.length
-      category = BostonEvents::Category.all.detect.with_index(1) { | category, index | @last_input.to_i == index }
+      category = get_category
     elsif @last_input == "exit"
       exit_app
     else
@@ -30,6 +30,7 @@ class BostonEvents::CLI
       select_category(scraper)
     end # if/elsif/else
     BostonEvents::Event.list_events(scraper, category)
+    category = get_category
     list_events_in_category(scraper, category)
 end # #select_category
 
@@ -37,8 +38,7 @@ end # #select_category
     puts; puts "Here's what's happening in the #{category.name.capitalize} category:"
     puts
 
-######### This line works without the 'all' if the events pre-existed in the db but NOT if they are scraped at the time the app is run
-    category.events.all.each.with_index(1) do | event, index | 
+    category.events.each.with_index(1) do | event, index | 
       puts "#{index}. #{event.name}, #{event.dates}, presented by #{event.sponsor.name}"
     end #each
     puts; puts "Select an event to see more information or type 'list' to return to the category list."
@@ -47,13 +47,11 @@ end # #select_category
 
   def choose_event_to_view(scraper, category)
     while user_input != 'exit'
-      if @last_input.to_i >= 1 && @last_input.to_i <= category.events.all.length   ############# Here too
-        event = BostonEvents::Event.all.detect.with_index(1) { | event, index | @last_input.to_i == index }
+      if @last_input.to_i >= 1 && @last_input.to_i <= category.events.length
+        event = get_event
         return_event_info(category, @last_input)
       elsif @last_input == "list"
         select_category(scraper)
-      # elsif @last_input == "exit"
-      #   exit_app
       else
         puts "I'm not sure what you want - please enter a number between 1 and #{category.events.length} or type list."
       end # if/elsif/else
@@ -62,7 +60,7 @@ end # #select_category
   end
 
   def return_event_info(category, input)
-    category.events.all.detect.with_index(1) do | event, index |  ############ And here
+    category.events.detect.with_index(1) do | event, index |
       if input.to_i == index
         puts_event_info(event)
       end
@@ -91,16 +89,19 @@ end # #select_category
       BostonEvents::Category.destroy_all
       BostonEvents::Venue.destroy_all
       BostonEvents::Sponsor.destroy_all
+    end
 
+    def get_category
+      BostonEvents::Category.all.detect.with_index(1) { | category, index | @last_input.to_i == index }
+    end
+
+    def get_event
+      BostonEvents::Event.all.detect.with_index(1) { | event, index | @last_input.to_i == index }
     end
 
     def exit_app
       clear_db
       abort ("\nThanks for stopping by -- come back often to check out what's going on around town!")
-    end
-
-    def open_in_browser(url)
-      system("open '#{url}'")
     end
 
   end

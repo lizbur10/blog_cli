@@ -41,24 +41,26 @@ class BostonEvents::Scraper
             # puts new_category
         end
       end
-      top_ten = BostonEvents::Category.new
-      top_ten.url = 'top-ten'
-      top_ten.name = 'Top Ten'
-      top_ten.save
+      if !BostonEvents::Category.all.find_by(:url => "top-ten")
+        top_ten = BostonEvents::Category.new
+        top_ten.url = 'top-ten'
+        top_ten.name = 'Top Ten'
+        top_ten.save
+      end
     end
   
     def route_event_scrape(category)
       if category.url == 'top-ten'
         @doc = Nokogiri::HTML(open(EVENT_SELECTORS['top-ten'][:url]))
-        scrape_events(category, 'top-ten')
+        scrape_events(category.name, 'top-ten')
       else
         @doc = Nokogiri::HTML(open(EVENT_SELECTORS['featured'][:url] + "#{category.url}/"))
-        scrape_events(category, 'featured')
-        scrape_events(category, 'listed')
+        scrape_events(category.name, 'featured')
+        scrape_events(category.name, 'listed')
       end # if/else
     end
   
-    def scrape_events(category, type)
+    def scrape_events(category_name, type)
         @doc.search(EVENT_SELECTORS[type][:iterate_over]).each_with_index do | this_event, index |
             event = BostonEvents::Event.new
             event.name = this_event.search(EVENT_SELECTORS[type][:name]).text.strip
@@ -75,10 +77,8 @@ class BostonEvents::Scraper
             event.deal_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[1].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[1]
             event.website_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[0].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[0]
     
-            event.category = category
+            event.category = BostonEvents::Category.find_or_create_by(:name => category_name)
             event.save
-            ## Using this binding shows that category.events always returns an empty array but venue.events or sponsor.events returns an array of events
-            # binding.pry
         end
     end
   
