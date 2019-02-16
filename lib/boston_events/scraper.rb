@@ -4,7 +4,7 @@ class BostonEvents::Scraper
   
     EVENT_SELECTORS = {
       "top-ten" => {
-        url: "http://calendar.artsboston.org/",
+        url: "https://calendar.artsboston.org/",
         iterate_over: "section.list-blog article.blog-itm",
         name: "h2.blog-ttl",
         dates: "div.left-event-time.evt-date-bubble",
@@ -12,7 +12,7 @@ class BostonEvents::Scraper
         event_urls: "div.b-btn.__inline_block_fix_space a"
       },
       "featured" => {
-        url: "http://calendar.artsboston.org/categories/",
+        url: "https://calendar.artsboston.org/categories/",
         iterate_over: "article.category-detail",
         name: "h1.p-ttl",
         dates: "div.left-event-time.evt-date-bubble",
@@ -20,7 +20,7 @@ class BostonEvents::Scraper
         event_urls: "div.b-btn.cat-detail.__inline_block_fix_space a"
       },
       "listed" => {
-        url: "http://calendar.artsboston.org/categories/",
+        url: "https://calendar.artsboston.org/categories/",
         iterate_over: "section.list-category article.category-itm",
         name: "h2.category-ttl",
         dates: "div.left-event-time.evt-date-bubble",
@@ -30,10 +30,11 @@ class BostonEvents::Scraper
     }
   
     def scrape_categories
-      doc = Nokogiri::HTML(open("http://calendar.artsboston.org/"))
+      doc = Nokogiri::HTML(open("https://calendar.artsboston.org/"))
       doc.search(".main-menu .mn-menu .nav > li > a").each do | link |
-        url = link.attribute("href").text.gsub("/categories/","").gsub("/","")
-        if !BostonEvents::Category.all.find_by(:url => url)
+        url = link.attribute("href").text.gsub("https://calendar.artsboston.org/","").gsub("categories/","").gsub("/","")
+
+        if !BostonEvents::Category.all.find_by(:url => url) && url != 'blog'
             new_category = BostonEvents::Category.new
             new_category.url = url
             new_category.name = link.text.strip
@@ -62,23 +63,25 @@ class BostonEvents::Scraper
   
     def scrape_events(category_name, type)
         @doc.search(EVENT_SELECTORS[type][:iterate_over]).each_with_index do | this_event, index |
+          if !!this_event.search(EVENT_SELECTORS[type][:name]).text.strip
             event = BostonEvents::Event.new
             event.name = this_event.search(EVENT_SELECTORS[type][:name]).text.strip
     
             dates = this_event.search(EVENT_SELECTORS[type][:dates])
             event.dates = get_event_dates(dates)
-    
-            sponsor_name = this_event.search(EVENT_SELECTORS[type][:sponsor_and_venue_names])[0].text.strip.gsub("Presented by ","").gsub(/  at .*/,"")
+
+            sponsor_name = this_event.search(EVENT_SELECTORS[type][:sponsor_and_venue_names])[0].text.strip.gsub("Presented by ","").gsub(/  at .*/,"") if this_event.search(EVENT_SELECTORS[type][:sponsor_and_venue_names])[0]
             event.sponsor = BostonEvents::Sponsor.find_or_create_by(:name => sponsor_name)
-    
-            venue_name = this_event.search(EVENT_SELECTORS[type][:sponsor_and_venue_names])[0].text.split(" at ")[1].strip
+
+            venue_name = this_event.search(EVENT_SELECTORS[type][:sponsor_and_venue_names])[0].text.split(" at ")[1].strip if this_event.search(EVENT_SELECTORS[type][:sponsor_and_venue_names])[0]
             event.venue = BostonEvents::Venue.find_or_create_by(:name => venue_name)
-    
+
             event.deal_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[1].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[1]
             event.website_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[0].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[0]
     
             event.category = BostonEvents::Category.find_or_create_by(:name => category_name)
             event.save
+          end
         end
     end
   
