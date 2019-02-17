@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 4) do
     t.string "dates"
     t.string "deal_url"
     t.string "website_url"
+    t.string "description"
     t.integer "category_id"
     t.integer "venue_id"
     t.integer "sponsor_id"

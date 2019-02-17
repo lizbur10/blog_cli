@@ -7,6 +7,7 @@ class BostonEvents::Scraper
         url: "https://calendar.artsboston.org/",
         iterate_over: "section.list-blog article.blog-itm",
         name: "h2.blog-ttl",
+        details_url: ".pic a",
         dates: "div.left-event-time.evt-date-bubble",
         sponsor_and_venue_names: "p.meta",
         event_urls: "div.b-btn.__inline_block_fix_space a"
@@ -15,6 +16,7 @@ class BostonEvents::Scraper
         url: "https://calendar.artsboston.org/categories/",
         iterate_over: "article.category-detail",
         name: "h1.p-ttl",
+        details_url: ".pic a",
         dates: "div.left-event-time.evt-date-bubble",
         sponsor_and_venue_names: "p.meta",
         event_urls: "div.b-btn.cat-detail.__inline_block_fix_space a"
@@ -23,6 +25,7 @@ class BostonEvents::Scraper
         url: "https://calendar.artsboston.org/categories/",
         iterate_over: "section.list-category article.category-itm",
         name: "h2.category-ttl",
+        details_url: ".pic a",
         dates: "div.left-event-time.evt-date-bubble",
         sponsor_and_venue_names: "p.meta",
         event_urls: "div.b-btn.category a"
@@ -53,17 +56,17 @@ class BostonEvents::Scraper
     def route_event_scrape(category)
       if category.url == 'top-ten'
         @doc = Nokogiri::HTML(open(EVENT_SELECTORS['top-ten'][:url]))
-        scrape_events(category.name, 'top-ten')
+        scrape_events(category, 'top-ten')
       else
         @doc = Nokogiri::HTML(open(EVENT_SELECTORS['featured'][:url] + "#{category.url}/"))
-        scrape_events(category.name, 'featured')
-        scrape_events(category.name, 'listed')
+        scrape_events(category, 'featured')
+        scrape_events(category, 'listed')
       end # if/else
     end
   
-    def scrape_events(category_name, type)
+    def scrape_events(category, type)
         @doc.search(EVENT_SELECTORS[type][:iterate_over]).each_with_index do | this_event, index |
-          if !!this_event.search(EVENT_SELECTORS[type][:name]).text.strip
+          if this_event.search(EVENT_SELECTORS[type][:name]).text.strip != ""
             event = BostonEvents::Event.new
             event.name = this_event.search(EVENT_SELECTORS[type][:name]).text.strip
     
@@ -79,7 +82,12 @@ class BostonEvents::Scraper
             event.deal_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[1].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[1]
             event.website_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[0].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[0]
     
-            event.category = BostonEvents::Category.find_or_create_by(:name => category_name)
+            event.category = category
+
+            inner_doc_url = this_event.search(EVENT_SELECTORS[type][:details_url]).attribute("href").value
+            @inner_doc = Nokogiri::HTML(open(inner_doc_url))
+            event.description = @inner_doc.search('#_ed_short > p:nth-child(1)').text
+
             event.save
           end
         end
