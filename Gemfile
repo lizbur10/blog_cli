@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in blog_cli.gemspec
+
+# Specify your gem's dependencies in boston_events.gemspec
 gemspec
