@@ -81,18 +81,22 @@ class BostonEvents::Scraper
 
             event.deal_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[1].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[1]
             event.website_url = this_event.search(EVENT_SELECTORS[type][:event_urls])[0].attribute("href") if this_event.search(EVENT_SELECTORS[type][:event_urls])[0]
-    
+            event.details_url = this_event.search(EVENT_SELECTORS[type][:details_url]).attribute("href").value
+
             event.category = category
-
-            inner_doc_url = this_event.search(EVENT_SELECTORS[type][:details_url]).attribute("href").value
-            @inner_doc = Nokogiri::HTML(open(inner_doc_url))
-            event.description = @inner_doc.search('#_ed_short > p:nth-child(1)').text
-
             event.save
           end
         end
     end
-  
+
+    def scrape_event_description(event)
+      @doc = Nokogiri::HTML(open(event.details_url))
+      description = @doc.search('#_ed_short > p:nth-child(1)').text
+      description =+ @doc.search('#_ed_full > p').text if @doc.search('#_ed_full > p')
+      event.description = description.gsub(/(\.)([A-Z])/, '\1 \2').gsub(/(\w)([A-Z])/, '\1. \2')
+      event.save
+    end
+
     def get_event_dates(dates)
       if dates.search("div.date").length > 0
         dates.search("div.month").text.gsub(/\s+/," ").strip + " - " + dates.search("div.date").text.gsub(/\s+/," ").strip
@@ -102,4 +106,3 @@ class BostonEvents::Scraper
     end
   
   end
-  

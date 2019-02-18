@@ -57,7 +57,10 @@ end # #select_category
     # while user_input != 'exit' && user_input != 'x'
     if @last_input.to_i >= 1 && @last_input.to_i <= category.events.length
         event = get_event
-        return_event_info(category, scraper)
+        scraper.scrape_event_description(event)
+        # !!! EVENT DETAIL SCRAPER CALLED HERE !!! #
+        
+        return_event_info(scraper, category, get_event)
       # elsif @last_input == "cats" || @last_input == 'c'
       #   select_category(scraper)
       # elsif @last_input == 'events' || @last_input == 'v'
@@ -69,12 +72,8 @@ end # #select_category
     # @last_input == "exit" || @last_input == 'x' ? exit_app : nil 
   end
 
-  def return_event_info(category, scraper)
-    category.events.detect.with_index(1) do | event, index |
-      if @last_input.to_i == index
+  def return_event_info(scraper, category, event)
         puts_event_info(event)
-      end
-    end # detect
     
     puts; puts "ENTER:"
     puts "   'events' or 'v' to see the list of events in the #{category.name.upcase} category"
@@ -86,7 +85,7 @@ end # #select_category
   end
 
   def puts_event_info(event)
-    puts "\e[2J\e[0;0H"
+    puts "\e[2J\e[0;0H" # http://ruby.11.x6.nabble.com/Is-there-a-way-to-clear-the-contents-of-a-terminal-td2988827.html
     puts; puts "======================================================================================="
     puts; puts "OK, here are the details:"
     puts; puts "#{event.name.upcase}"
