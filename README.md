@@ -2,6 +2,8 @@
 
 This is a refactor of my CLI Project to add a database. It was done as an exercise and is both incomplete and not entirely well constructed in places -- enter at your own risk!!
 
+![](cli_app_demo.gif)
+
 
 ## Installation
 
