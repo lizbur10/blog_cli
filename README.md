@@ -2,9 +2,6 @@
 
 This is a refactor of a CLI Project I did for Flatiron School. I added a database and made some improvements to the user interface. It was done as an exercise -- adding a database to an application like this doesn't make much sense.
 
-![](cli_app_demo.gif)
-
-
 ## Installation
 
 TODO: Write installation instructions here
